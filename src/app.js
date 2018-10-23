@@ -8,6 +8,7 @@ const koaBody = require('koa-body')
 // My server functions
 const router = require('./router')
 const log = require('./logger')
+const config = require('./config')
 
 const app = new Koa()
 
@@ -17,4 +18,33 @@ app.use(koaBody())
 
 app.use(router)
 
-app.listen(3000, () => log.info('Server is up and running'))
+const services = {
+  server: null,
+}
+
+app.start = async () => {
+  log.info('Server starting')
+
+  services.server = await new Promise((resolve, reject) => {
+    const listener = app.listen(
+      config.port,
+      err => err ? reject(err) : resolve(listener),
+    )
+  })
+
+  log.info('All services have started')
+}
+
+app.stop = () => {
+  log.info('Shutting down server')
+
+  services.server.close()
+}
+
+app
+  .start()
+  .then(() => log.info('App is running...'))
+  .catch(err => log.error(err))
+
+process.on('SIGINT', () => app.stop())
+process.on('SIGTERM', () => app.stop())

@@ -3,6 +3,7 @@
 const Router = require('koa-router')
 const clients = require('./data/clients')
 const { validate } = require('./utils/validation')
+const log = require('./logger')
 
 const router = new Router()
 
@@ -19,6 +20,7 @@ router.get('/clients/:id', ctx => {
 
   if (!client) {
     ctx.status = 404
+    log.warn('Client not found')
     return
   }
 
